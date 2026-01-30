@@ -1134,6 +1134,21 @@
             .hud-row { gap: clamp(1rem, 3vmin, 2rem); }
         }
 
+        /* Ensure HUD stays side-by-side on wider viewports */
+        @media (min-width: 700px) {
+            .hud-row {
+                flex-wrap: nowrap; /* prevent wrapping on desktop/tablet */
+                justify-content: center;
+                gap: clamp(20px, 3vmin, 36px);
+                align-items: center;
+            }
+            .hud-item {
+                flex: 0 0 auto; /* don't grow/shrink unexpectedly */
+                min-width: 200px; /* keep a reasonable pill width */
+                max-width: 420px;
+            }
+        }
+
         /* Stronger desktop dock rules to prevent vertical stacking */
         @media (min-width: 600px) {
             .dock {
