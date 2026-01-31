@@ -8,6 +8,7 @@
             zoom: 1 !important;
             height: 100%;
             overflow: hidden; /* disable page scrolling */
+            padding-top: env(safe-area-inset-top, 10px); /* prevent notch / top cropping */
         }
     </style>
     <title>HeyCash!</title>
@@ -16,6 +17,7 @@
         /* --- CSS STYLES --- */
         :root {
             --bg-color: #00c853;
+            --mobile-banner-height: 120px; /* central source of truth for banner + safe spacing */
             --grid-bg: rgba(255,255,255,0.06);
             --cell-bg: rgba(255,255,255,0.06);
             --text-color: #072014;
@@ -65,8 +67,8 @@
         width: 90%;
         height: 100vh;
         margin: 0 auto;
-        /* FIX: Use flexible vertical padding (vh) so it doesn't get stuck */
-        padding: 2vh 10px; 
+        /* FIX: Use flexible vertical padding (vh) and respect top safe-area */
+        padding: calc(2vh + env(safe-area-inset-top, 8px)) 10px; 
         
         /* expose grid sizing variables so dock items can match grid cell size */
         --grid-size: clamp(300px, 45vmin, 380px);
@@ -241,8 +243,8 @@
             .hud-container { padding-left: clamp(1rem, 3vmin, 2rem); }
             /* Keep main dock visible on mobile so pieces spawn in the intended area */
             .mobile-dock-floating { display: flex; }
-            /* leave just enough space for the 120px mobile banner + safe area */
-            #game-container { padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px) + 8px); }
+            /* leave just enough space for the mobile banner + safe area */
+            #game-container { padding-bottom: calc(var(--mobile-banner-height) + env(safe-area-inset-bottom, 0px) + 8px); }
         }
 
         @keyframes fade-slide-in {
@@ -770,7 +772,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 82px; /* slightly smaller for discreteness */
+            height: var(--mobile-banner-height); /* slightly smaller for discreteness */
             background: rgba(255, 255, 255, 0.654); /* subtle glass */
             backdrop-filter: blur(8px) saturate(1.05);
             -webkit-backdrop-filter: blur(8px) saturate(1.05);
@@ -1135,7 +1137,7 @@
             font-family: 'Mona Sans', 'Helvetica', sans-serif;
             font-weight: 900;
             font-size: clamp(22px, 4vw, 32px);
-            letter-spacing: 1.2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
             pointer-events: none;
             width: 90%;
@@ -1178,8 +1180,8 @@
             /* Keep main dock visible on mobile */
             .mobile-dock-floating { display: flex !important; }
             /* position floating dock just above the 120px banner + safe area */
-            .mobile-dock-floating { bottom: calc(120px + env(safe-area-inset-bottom, 0px) + 12px) !important; }
-            #game-container { padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px) + 8px) !important; }
+                .mobile-dock-floating { bottom: calc(var(--mobile-banner-height) + env(safe-area-inset-bottom, 0px) + 12px) !important; }
+                #game-container { padding-bottom: calc(var(--mobile-banner-height) + env(safe-area-inset-bottom, 0px) + 8px) !important; }
         }
 
         /* Desktop layout fixes: keep column compact, enlarge grid, and make dock horizontal */
