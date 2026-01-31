@@ -1,14 +1,16 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#00c853">
     <style>
         html, body {
             zoom: 1 !important;
             height: 100%;
             overflow: hidden; /* disable page scrolling */
-            padding-top: env(safe-area-inset-top, 10px); /* prevent notch / top cropping */
+            padding-top: env(safe-area-inset-top, 0px); /* reserve physical safe area only */
         }
     </style>
     <title>HeyCash!</title>
@@ -23,8 +25,17 @@
             --text-color: #072014;
             --accent-color: #00e676;
             --gap: 1vmin; /* Responsive gap */
+            /* Reserve extra space at top for camera notch in portrait */
+            --notch-reserve: 40px;
         }
-
+        /* Shrink logo for mid-width, short-height screens to maximize grid space */
+        @media (min-width: 600px) and (max-width: 1219px) and (max-height: 600px) {
+            #game-container > .logo {
+                width: clamp(60px, 12vw, 120px) !important;
+                max-width: 22vw !important;
+                margin-bottom: 0 !important;
+            }
+        }
         body {
             position: relative;
             color: var(--text-color);
@@ -54,7 +65,8 @@
             background-size: cover;
             z-index: -1;
             pointer-events: none;
-            filter: brightness(1.2), saturate(0.9); ;
+            /* FIX: proper CSS filter syntax (space-separated functions) */
+            filter: brightness(1.2) saturate(0.9);
         }
 
         /* Responsive Container */
@@ -118,12 +130,14 @@
             .dock { order: 3; margin-top: 6px; align-self: flex-end; }
 
             /* Ensure grid scales properly in landscape by capping grid-size relative to viewport height */
-            :root { --grid-size: clamp(260px, 50vmin, 420px); }
+            :root { --grid-size: clamp(180px, 50vmin, 420px); }
         }
 .dock {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
-    overflow: visible !important; /* Show shadows/glows outside the box */
+    /* FIX: allow horizontal scrolling on narrow screens while keeping vertical visuals visible */
+    overflow-x: auto;
+    overflow-y: visible;
     position: relative;
     z-index: 900;
 }
@@ -343,6 +357,28 @@
 
         /* spacing for HUD above grid */
         .hud-row { margin-bottom: 8px; }
+        /* Center the unified stats pill in all layouts */
+        .hud-row { justify-content: center !important; width: var(--grid-size); margin-left: auto; margin-right: auto; }
+        /* Unified Stats Pill (Time | Rewards | Score) */
+        .stats-pill {
+            display: flex; align-items: center; justify-content: center;
+            gap: clamp(12px, 2vmin, 22px);
+            padding: 12px clamp(16px, 3vmin, 28px);
+            background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.28));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 999px;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.06);
+            backdrop-filter: blur(6px) saturate(1.05);
+            margin: 0 auto;
+        }
+        .stats-pill .pill-seg { display: flex; flex-direction: column; align-items: center; min-width: clamp(80px, 18vmin, 160px); }
+        .stats-pill .seg-label { font-size: 11px; text-transform: uppercase; color:#bcd8c1; letter-spacing:.6px; font-weight:800; margin-bottom:2px; }
+        .stats-pill .seg-value { font-size: clamp(18px, 3vmin, 28px); font-weight: 900; color:#fff; text-shadow: 0 6px 18px rgba(0,0,0,0.45); }
+        .stats-pill .time .seg-value { color:#ffd54f; text-shadow: 0 6px 18px rgba(255,213,79,0.35); }
+        .stats-pill .rewards .seg-value { color:#00ff9a; text-shadow: 0 6px 18px rgba(0,255,154,0.28); }
+        .stats-pill .score .seg-value { color:#e9fff0; text-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+        .stats-pill .currency { margin-right: 2px; opacity:.95; }
+        .pill-divider { width: 1px; height: 30px; background: rgba(255,255,255,0.14); }
 
         /* Play area wrapper to keep grid, CTA and dock centered as a group */
         .play-area {
@@ -469,6 +505,8 @@
             overflow-x: auto; /* enable horizontal scroll on narrow screens */
             -webkit-overflow-scrolling: touch;
             margin-top: 8px;
+            /* Always keep dock visually above the bottom banner */
+            margin-bottom: calc(var(--mobile-banner-height) + env(safe-area-inset-bottom, 0px) + 18px);
             padding: 12px 12px;
             box-sizing: border-box;
             animation: fade-slide-in 0.8s ease-out 0.2s backwards;
@@ -743,6 +781,21 @@
             overflow: hidden;
         }
 
+        /* Pill variant for HUD items */
+        .hud-item.pill {
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.28));
+            padding: 10px 16px;
+            flex: 0 0 auto;
+            min-width: clamp(120px, 26vmin, 200px);
+            max-width: clamp(160px, 32vmin, 260px);
+            justify-content: center;
+        }
+        .hud-item.pill .hud-label { letter-spacing: .8px; font-weight: 800; font-size: 11px; opacity: .95; }
+        .hud-item.pill .hud-value { font-size: clamp(18px, 3vmin, 26px); font-weight: 900; }
+        .rewards-pill .hud-value { color: #00ff9a; text-shadow: 0 6px 18px rgba(0,255,154,0.28); }
+        .rewards-pill .currency { margin-right: 2px; opacity: .9; }
+
         /* Ensure label/value text truncates instead of pushing layout */
         .hud-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.02; min-width: 0; overflow: hidden; }
         .hud-value { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 800; }
@@ -811,7 +864,7 @@
 
         /* --- MOBILE BANNER (white bottom on small screens) --- */
         .mobile-banner {
-            display: none; /* shown via media query */
+            display: none; /* default hidden, toggled via JS or media queries */
             position: fixed;
             bottom: 0;
             left: 0;
@@ -822,7 +875,6 @@
             -webkit-backdrop-filter: blur(8px) saturate(1.05);
             border-top-left-radius: 26px;
             border-top-right-radius: 26px;
-            display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
@@ -862,6 +914,9 @@
 
         /* Mobile install image (banner) */
         .mobile-install-img { width: 120px; height: 44px; object-fit: contain; display:inline-block; cursor: pointer; box-shadow: 0 6px 12px rgba(0,0,0,0.08); border-radius: 10px; background: transparent; }
+        /* Hide install button by default; show only when banner has .show-install (e.g., game over) */
+        .mobile-banner .mobile-install-img { display: none; }
+        .mobile-banner.show-install .mobile-install-img { display: inline-block; }
 
         /* Gift card graphics for the banner */
         .gift-cards-icon {
@@ -929,8 +984,8 @@
         .mobile-banner .gift-card.g3 { left: 34px; top: 12px; transform: rotate(8deg); background: linear-gradient(135deg,#ff9900,#ffb74d); z-index:1; }
         .mobile-banner .gift-card .card-logo { width: 22px; height:22px; right:6px; top:6px; }
 
-/* Desktop: show banner as a vertical card on the right side AND squish layout */
-@media (min-width: 600px) {
+/* Large desktop: show banner as a vertical card on the right side AND squish layout */
+@media (min-width: 1700px) {
     /* 1. SQUISH THE CONTAINER */
     #game-container { 
         /* Force grid to be exactly half the screen height */
@@ -1218,14 +1273,13 @@
         
         #game-over { display: none; }
 
-        /* FORCE mobile overrides placed last to prevent earlier rules from winning
-           Ensures desktop dock is hidden and floating mobile dock is visible */
+        /* FORCE mobile overrides placed last to prevent earlier rules from winning */
         @media (max-width: 600px) {
             /* Keep main dock visible on mobile */
             .mobile-dock-floating { display: flex !important; }
             /* position floating dock just above the 120px banner + safe area */
                 .mobile-dock-floating { bottom: calc(var(--mobile-banner-height) + env(safe-area-inset-bottom, 0px) + 12px) !important; }
-                #game-container { padding-bottom: calc(var(--mobile-banner-height) + env(safe-area-inset-bottom, 0px) + 8px) !important; }
+            #game-container { padding-bottom: calc(var(--mobile-banner-height) + env(safe-area-inset-bottom, 0px) + 12px) !important; }
         }
 
         /* Desktop layout fixes: keep column compact, enlarge grid, and make dock horizontal */
@@ -1283,27 +1337,63 @@
             .dock { padding: 6px 0; gap: clamp(16px, 5vmin, 28px); justify-content: space-around; width: 100%; max-width: 100%; }
         }
 
-        /* Floating desktop install button (for cases where bottom banner is hidden or covered) */
-        .desktop-install-cta {
-            display: none; /* default hidden, enabled for desktop via media query */
-            position: fixed;
-            top: 50%;
-            right: clamp(12px, 2vmin, 24px);
-            transform: translateY(-50%);
-            background: linear-gradient(90deg, #00D166, #00b85a);
-            color: #0b2117;
-            font-family: 'Mona Sans', sans-serif;
-            font-weight: 900;
-            letter-spacing: 0.2px;
-            border: none;
-            padding: 12px 18px;
-            border-radius: 999px;
-            box-shadow: 0 10px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
-            cursor: pointer;
-            z-index: 3200; /* above overlays so it's always available */
+        /* Tablet/Mid screens (600–1219px): keep central stacked layout and bottom banner */
+        @media (min-width: 600px) and (max-width: 1219px) {
+            #game-container {
+                --grid-size: min(54vmin, 412px);
+                max-width: 600px;
+                padding-top: calc(1.5vh + env(safe-area-inset-top, 0px));
+                padding-bottom: calc(var(--mobile-banner-height) + env(safe-area-inset-bottom, 0px) + 12px);
+                gap: clamp(10px, 2vmin, 16px);
+                /* Responsive scale for overflow: shrink container if grid would overflow horizontally or vertically */
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            /* Scale down the whole container if it would overflow horizontally or vertically */
+            @media (max-width: 900px), (max-height: 600px) {
+                #game-container {
+                    /* Compute scale based on available width/height */
+                    transform: scale(calc(min((100vw - 32px) / (var(--grid-size) + 32), (100vh - 180px) / (var(--grid-size) + 180), 1)));
+                    transform-origin: top center;
+                }
+            }
+            .landscape .play-area { align-items: center; }
+            .landscape .hud-row { width: var(--grid-size); }
+            .mobile-banner {
+                position: fixed; left: 0; right: 0; bottom: 0; top: auto;
+                transform: none; width: 100%; height: var(--mobile-banner-height);
+                flex-direction: row; align-items: center; justify-content: space-between;
+                border-radius: 26px 26px 0 0;
+                padding: 12px 14px;
+            }
+            /* Ensure side-dock variant is disabled for tablets */
+            .mobile-banner .mobile-dock { display: flex; }
         }
-        .desktop-install-cta:hover { filter: brightness(1.05); transform: translateY(-50%) scale(1.03); }
-        @media (min-width: 768px) { .desktop-install-cta { display: inline-flex; align-items: center; gap: 8px; } }
+
+        /* Wide screens (1220–1699px): still use bottom banner; keep centered stack */
+        @media (min-width: 1220px) and (max-width: 1699px) {
+            #game-container {
+                --grid-size: clamp(520px, 50vmin, 680px);
+                padding-top: calc(1.5vh + env(safe-area-inset-top, 0px));
+                padding-bottom: calc(var(--mobile-banner-height) + env(safe-area-inset-bottom, 0px) + 12px);
+                gap: clamp(10px, 1.8vmin, 18px);
+            }
+            .play-area { align-items: center; }
+            .hud-row { width: var(--grid-size); }
+            .mobile-banner {
+                position: fixed; left: 0; right: 0; bottom: 0; top: auto;
+                transform: none; width: 100%; height: var(--mobile-banner-height);
+                flex-direction: row; align-items: center; justify-content: space-between;
+                border-radius: 26px 26px 0 0; padding: 12px 14px;
+            }
+            .mobile-banner .mobile-dock { display: flex; }
+        }
+
+        /* Floating desktop install button (for cases where bottom banner is hidden or covered) */
+        /* Disable floating desktop install button; banner handles CTA at game over */
+        .desktop-install-cta { display: none !important; }
 
         /* If you need the dock to always stack vertically, add the `column` class
            to the dock element: <div class="dock column" id="dock">. This rule
@@ -1648,7 +1738,7 @@
         }
         /* Removed extra mobile-scaling overrides — bottom margin kept below */
         /* Keep a consistent bottom margin so content doesn't touch screen edge */
-        #game-container { margin-bottom: calc(32px + env(safe-area-inset-bottom, 0px)) !important; }
+        #game-container { margin-bottom: calc(32px + env(safe-area-inset-bottom, 0px)) !important; padding-bottom: calc(var(--mobile-banner-height) + env(safe-area-inset-bottom, 0px) + 12px); }
 
         /* Push content slightly upward on small screens while keeping substantial bottom margin */
         @media (max-width: 600px) {
@@ -1863,8 +1953,147 @@
         /* Add a gentle horizontal sway on top of vertical float */
         .float.sway { animation-name: floatY, floatSway; animation-timing-function: linear, ease-in-out; animation-iteration-count: infinite, infinite; }
         @keyframes floatSway { 0% { transform: translateX(0) rotate(0deg); } 50% { transform: translateX(6px) rotate(-3deg); } 100% { transform: translateX(0) rotate(0deg); } }
+        /* Respect reduced motion preferences to improve accessibility and performance */
+        @media (prefers-reduced-motion: reduce) {
+            .loading-logo,
+            .tap-play-btn,
+            .reward-btn,
+            .mini-reward,
+            #tutorial-pointer,
+            .bg-floats .float,
+            .tutorial-floats .float,
+            #game-over .sun-rot,
+            .gift-card.g1,
+            .gift-card.g2,
+            .gift-card.g3 {
+                animation: none !important;
+            }
+            .tutorial-ghost,
+            #tutorial-pointer,
+            .hud-item,
+            .block-shape,
+            .dock,
+            .grid-container {
+                transition: none !important;
+            }
+        }
+        /* --- Landscape support & safe-area aware sizing --- */
+        /* Use dynamic viewport units when available to avoid iOS URL bar jumps */
+        @supports (height: 100svh) {
+            html, body { height: 100svh; }
+        }
+
+        /* Generic landscape: switch to horizontal layout and tighten spacing */
+        :root.landscape { --grid-size: clamp(240px, 50vmin, 460px); }
+        @media (orientation: landscape) and (max-height: 420px) {
+            :root { --grid-size: clamp(150px, 42vh, 340px); }
+            .logo { width: clamp(56px, 10vmin, 120px); }
+            .landscape .play-area { row-gap: 6px; padding: 0 clamp(6px, 2vmin, 16px); }
+            .hud-row { gap: 8px !important; }
+            .stats-pill { padding: 8px 12px; gap: 12px; }
+            .dock { padding: 8px 8px; }
+        }
+
+        .landscape #game-container {
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(8px, 2vmin, 18px);
+            padding-top: calc(1vh + env(safe-area-inset-top, 6px));
+            padding-bottom: calc(1vh + env(safe-area-inset-bottom, 6px));
+            padding-left: max(clamp(8px,2vmin,16px), env(safe-area-inset-left, 0px));
+            padding-right: max(clamp(8px,2vmin,16px), env(safe-area-inset-right, 0px));
+            width: 100%;
+            max-width: none;
+        }
+        .landscape .logo {
+            width: clamp(72px, 12vmin, 140px);
+            height: auto;
+            margin: 0 12px 0 0;
+            align-self: center;
+        }
+        /* In landscape, keep a simple horizontal two-panel layout: logo left, game right */
+        .landscape .play-area {
+            flex: 1 1 auto;
+            max-width: 100%;
+            padding: 0 clamp(10px, 3vmin, 28px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            row-gap: clamp(6px, 1.8vmin, 12px);
+        }
+        /* Order content to match desktop composition: headline -> grid -> HUD -> dock */
+        .landscape .headline { order: 1; text-align: center; margin: 0 0 clamp(8px, 1.8vmin, 12px); }
+        .landscape .grid-container { order: 2; margin: 0 0 clamp(10px, 2vmin, 16px); }
+        .landscape .hud-row { order: 3; width: var(--grid-size); justify-content: space-between; margin: clamp(6px, 1.6vmin, 12px) 0 0; }
+        .landscape .dock { order: 4; }
+        .landscape .dock {
+            align-self: center;
+            /* row dock under the grid for regular landscape */
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            gap: clamp(16px, 3vmin, 24px);
+            width: var(--grid-size);
+            max-width: var(--grid-size);
+            height: auto;
+            max-height: none;
+            padding: 8px 6px;
+        }
+        .landscape .dock .block-cell { width: var(--cell-size); height: var(--cell-size); }
+
+        /* Extra-tight landscape (small height devices) */
+        :root.landscape-tight { --grid-size: clamp(220px, 46vmin, 380px); }
+        .landscape-tight .dock { transform: scale(0.9); transform-origin: top center; }
+        .landscape-tight .dock.column { max-height: calc(100vh - 20px); }
+        @supports (height: 100svh) {
+            .landscape-tight .dock.column { max-height: calc(100svh - 20px); }
+        }
+
+        /* --- Portrait tuning: spacious margins and clean stacking --- */
+        :root.portrait { --grid-size: clamp(320px, 78vw, 520px); }
+        @supports (height: 100svh) {
+            :root.portrait { --grid-size: min(clamp(320px, 78vw, 520px), 72svh); }
+        }
+        @media (orientation: portrait) {
+            #game-container {
+                width: 100%;
+                max-width: 560px;
+                /* top | sides | bottom (leave room for mobile banner) */
+                padding: 2vh clamp(14px, 4vmin, 22px) calc(var(--mobile-banner-height) + env(safe-area-inset-bottom, 0px) + 18px);
+                gap: clamp(12px, 3vmin, 22px);
+            }
+            .play-area {
+                gap: clamp(12px, 3vmin, 22px);
+            }
+            .headline { margin: 4px 0 8px; }
+            .hud-row {
+                width: var(--grid-size);
+                margin: 2px auto 8px;
+                justify-content: space-between;
+            }
+            .grid-container {
+                margin: 4px auto 10px;
+            }
+            .dock {
+                width: var(--grid-size);
+                max-width: var(--grid-size);
+                margin: 8px auto 0;
+                padding: 10px 10px;
+                gap: clamp(14px, 3vmin, 22px);
+            }
+        }
+
+        /* In portrait, anchor content to top-left to respect notch area and allow squeeze scaling */
+        :root.portrait body { justify-content: flex-start; align-items: center; }
+        :root.portrait #game-container { margin-top: var(--notch-reserve); padding-top: 2vh !important; }
+
+        /* Banner: keep visible but disable pointer events during gameplay; only show install image when .show-install present */
+        .mobile-banner { pointer-events: none; }
+        .mobile-banner.show-install { pointer-events: auto; }
     </style>
-</head>
 <style>
     /* Small-screen adjustments: scale down content instead of reflowing layout */
     @media (max-width: 780px) {
@@ -1902,6 +2131,7 @@
         }
     }
 </style>
+</head>
 <body>
 
         <!-- Loading overlay (shown until assets are preloaded) -->
@@ -1946,6 +2176,13 @@
             <div id="tutorial-pop-time" style="position:fixed;left:52%;top:56%;transform:translate(-50%,-50%);color:#71f588;font-weight:900;font-size:24px;opacity:0;text-shadow:0 4px 8px rgba(0,0,0,.5);pointer-events:none;z-index:4000;">+2s</div>
             <button id="tutorial-cta" onclick="tutorialNextStep()" style="margin-top:44px;font-size:clamp(22px,5vw,26px);background:linear-gradient(90deg,#01e991 80%,#38ff4f 110%);border:none;border-radius:2em;letter-spacing:1.2px;font-weight:900;color:#175e35;box-shadow:0 10px 40px #14e35b32;padding:20px 54px;cursor:pointer;display:none;">Start Playing</button>
         </div>
+        
+        <!-- Ready splash overlay (shown after tutorial; click to start timer) -->
+        <div id="ready-overlay" class="overlay" style="display:none;">
+            <img src="images/Logo.png" alt="HeyCash Logo" class="logo">
+            <h1>Are you ready?</h1>
+            <button id="ready-start-btn" class="cta-btn" aria-label="Start Game">Start</button>
+        </div>
         <div id="game-container">
         <img src="images/Logo.png" alt="HeyCash Logo" class="logo" style="width: clamp(420px, 40vmin, 700px); max-width: 60%; height: auto;">
         
@@ -1956,17 +2193,20 @@
             </div>
 
             <div class="hud-row">
-                <div class="hud-item compact square">
-                    <div class="hud-text">
-                        <span class="hud-label">Time</span>
-                        <span class="hud-value" id="timer">60</span>
+                <div class="stats-pill" id="stats-pill">
+                    <div class="pill-seg time">
+                        <span class="seg-label">Time</span>
+                        <span class="seg-value" id="timer">60</span>
                     </div>
-                </div>
-                
-                <div class="hud-item compact square">
-                    <div class="hud-text">
-                        <span class="hud-label">Score</span>
-                        <span class="hud-value" id="score">0</span>
+                    <div class="pill-divider" aria-hidden="true"></div>
+                    <div class="pill-seg rewards">
+                        <span class="seg-label">Rewards</span>
+                        <span class="seg-value"><span class="currency">$</span><span id="rewards">0</span></span>
+                    </div>
+                    <div class="pill-divider" aria-hidden="true"></div>
+                    <div class="pill-seg score">
+                        <span class="seg-label">Score</span>
+                        <span class="seg-value" id="score">0</span>
                     </div>
                 </div>
             </div>
@@ -1979,7 +2219,7 @@
         </div>
     </div>
 
-    <div class="mobile-banner" id="mobile-banner" style="display:none;" onclick="installApp()">
+    <div class="mobile-banner" id="mobile-banner" style="display:flex;">
         <div class="mobile-left">
             <img src="images/Logo2 - Small.png" alt="HeyCash small logo" class="mobile-side-logo">
             <div class="mobile-text">
@@ -2201,6 +2441,10 @@
             // bind HUD elements above the grid
             scoreEl = document.getElementById('score');
             timerEl = document.getElementById('timer');
+            // Initialize HUD values to actual game state (avoid jump from hardcoded HTML)
+            timerEl.innerText = timeLeft;
+            scoreEl.innerText = score;
+            try { updateRewards(); } catch(e){}
             updateGridVisuals(); // reflect pre-filled cells immediately
         }
 
@@ -2211,10 +2455,20 @@
             // ensure the main in-layout logo is visible
             if (mainHeaderLogo) mainHeaderLogo.style.display = '';
             isGameActive = true;
+            // Ensure banner is visible without install CTA during gameplay
+            try {
+                const mobileBanner = document.getElementById('mobile-banner');
+                if (mobileBanner) {
+                    mobileBanner.classList.remove('show-install');
+                    mobileBanner.style.display = 'flex';
+                }
+            } catch(e) {}
             // Do not automatically show the bottom banner here — it will be visible during tutorial and hidden after
             // (keeps the banner DOM loaded but avoids re-showing it after tutorial)
             spawnBlocks();
             startTimer();
+            try { squeezeToFit(); } catch(e) {}
+            try { updateRewards(); } catch(e){}
         }
 
         function createGrid() {
@@ -2437,7 +2691,8 @@
                     const parentDock = el._originalParent; // Use stored parent
                     el.remove();
                     // Spawn one new block to maintain 3 pieces in the dock where it came from
-                    const newShape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+                    // Use the same restricted pool used for the dock for consistency
+                    const newShape = DOCK_SHAPES[Math.floor(Math.random() * DOCK_SHAPES.length)];
                     const targetDockForSpawn = parentDock && parentDock.classList.contains('mobile-dock') ? parentDock : (parentDock || dockEl);
                     targetDockForSpawn.appendChild(createBlockElement(newShape));
                 } else {
@@ -2513,6 +2768,7 @@
             checkLines();
             if (!isTutorialActive) {
                 scoreEl.innerText = score;
+                try { updateRewards(); } catch(e){}
             }
         }
 
@@ -2594,6 +2850,7 @@
                     score += points;
                     timeLeft += lines * 2;
                     scoreEl.innerText = score;
+                    try { updateRewards(); } catch(e){}
                     timerEl.innerText = timeLeft;
                 }
                 // animate value pop when points/time change
@@ -2647,7 +2904,7 @@
         function startTimer() {
             timerInterval = setInterval(() => {
                 if (!isGameActive) return;
-                timeLeft--;
+                timeLeft = Math.max(0, timeLeft - 1);
                 timerEl.innerText = timeLeft;
                 if (timeLeft <= 0) endGame();
             }, 1000);
@@ -2660,7 +2917,11 @@
                         document.getElementById('final-reward').innerText = rewardAmount;
                         document.getElementById('game-over').style.display = 'flex';
                         const mobileBanner = document.getElementById('mobile-banner');
-                        if (mobileBanner) mobileBanner.style.display = 'none';
+                        if (mobileBanner) {
+                            // Show the install CTA only at game over
+                            mobileBanner.classList.add('show-install');
+                            mobileBanner.style.display = 'flex';
+                        }
                         // Animate bottom deck cards to move like real cards
                         try {
                             const deckCards = document.querySelectorAll('#game-over .more-cards .card-fake');
@@ -2681,6 +2942,7 @@
         window.addEventListener('resize', () => {
             // Re-evaluate whether the banner fits on screen
             try { checkAndToggleBanner(); } catch(e) {}
+            try { squeezeToFit(); } catch(e) {}
             // Refresh dock contents to match current layout on small debounce
             clearTimeout(window.__spawnResizeTimer);
             window.__spawnResizeTimer = setTimeout(() => {
@@ -2740,13 +3002,11 @@
         }
 
         function checkAndToggleBanner(){
-            const mobileBanner = document.getElementById('mobile-banner');
-            if (!mobileBanner) return;
-            if ((isGameActive || isTutorialActive) && canShowBanner()) {
-                mobileBanner.style.display = 'flex';
-            } else {
-                mobileBanner.style.display = 'none';
-            }
+            // Always keep banner visible; manage only the install button via class 'show-install'
+            try {
+                const mobileBanner = document.getElementById('mobile-banner');
+                if (mobileBanner) mobileBanner.style.display = 'flex';
+            } catch(e) {}
         }
         function indexToCell(r,c){ return gridEl.querySelectorAll('.cell')[r*GRID_SIZE + c]; }
         function highlightCells(r, startC, len){
@@ -2868,9 +3128,10 @@
                 const host = document.querySelector('.tutorial-floats');
                 if (host) host.querySelectorAll('.float').forEach(el => el.remove());
             } catch(e) {}
-            // Hide the mobile banner after the tutorial completes (keep DOM present but hidden)
-            try { const mobileBanner = document.getElementById('mobile-banner'); if (mobileBanner) mobileBanner.style.display = 'none'; } catch(e) {}
-            userInteractStart();
+            // Keep the mobile banner visible; ensure install CTA is hidden during gameplay
+            try { const mobileBanner = document.getElementById('mobile-banner'); if (mobileBanner) mobileBanner.classList.remove('show-install'); } catch(e) {}
+            // Show the ready splash; actual timer starts on user click
+            try { showReadySplash(); } catch(e) { userInteractStart(); }
         }
 
         function tutorialNextStep(){
@@ -3156,6 +3417,117 @@
     </script>
 
     <script>
+        // Landscape layout helper: toggle classes and dock mode based on orientation/height
+        (function(){
+            function updateOrientationLayout(){
+                var isLandscape = (window.innerWidth || 0) > (window.innerHeight || 0);
+                var tight = isLandscape && (window.innerHeight <= 480);
+                var root = document.documentElement;
+                if (isLandscape) { root.classList.add('landscape'); root.classList.remove('portrait'); }
+                else { root.classList.add('portrait'); root.classList.remove('landscape'); }
+                if (tight) root.classList.add('landscape-tight'); else root.classList.remove('landscape-tight');
+
+                try {
+                    var dock = document.getElementById('dock');
+                    if (dock) {
+                        // Default: horizontal dock in landscape, vertical only when height is tight
+                        if (isLandscape && tight) dock.classList.add('column'); else dock.classList.remove('column');
+                        if (isLandscape && tight) dock.style.transform = 'scale(0.9)'; else dock.style.transform = '';
+                        // Portrait: ensure dock is horizontal, full width of grid
+                        if (!isLandscape) {
+                            dock.classList.remove('column');
+                            dock.style.transform = '';
+                        }
+                    }
+                } catch (e) {}
+
+                try { checkAndToggleBanner(); } catch(e){}
+                try { squeezeToFit(); } catch(e){}
+            }
+            window.addEventListener('resize', updateOrientationLayout);
+            window.addEventListener('orientationchange', updateOrientationLayout);
+            document.addEventListener('DOMContentLoaded', updateOrientationLayout);
+            // slight delay to allow initial layout to settle
+            setTimeout(updateOrientationLayout, 60);
+        })();
+
+        // Squeeze game area to keep everything on-screen (portrait and tight landscape) while preserving safe areas
+        function squeezeToFit(){
+            var isPortrait = (window.innerHeight || 0) >= (window.innerWidth || 0);
+            var container = document.getElementById('game-container');
+            var banner = document.getElementById('mobile-banner');
+            if (!container || !banner) return;
+
+            // Reset scale first
+            container.style.transform = '';
+            container.style.transformOrigin = 'top center';
+
+            var bannerH = banner.getBoundingClientRect().height || 0;
+            var rect = container.getBoundingClientRect();
+
+            // Hide banner if height is extremely tight (e.g. <=419px)
+            var minHeightForBanner = 419;
+            if ((window.innerHeight || 0) <= minHeightForBanner) {
+                banner.style.display = 'none';
+                bannerH = 0;
+            } else {
+                banner.style.display = 'flex';
+                bannerH = banner.getBoundingClientRect().height || 0;
+            }
+
+            if (isPortrait) {
+                // Compute top reserved space: body padding (safe area) + container marginTop (notch reserve)
+                var topPad = (parseFloat(getComputedStyle(document.body).paddingTop || '0') || 0) + (parseFloat(getComputedStyle(container).marginTop || '0') || 0);
+                var available = (window.innerHeight || 0) - bannerH - 8; // small breathing room
+                var need = rect.height + topPad;
+                if (need > available) {
+                    var scaleP = Math.max(0.52, (available - topPad) / rect.height);
+                    container.style.transform = 'scale(' + scaleP + ')';
+                }
+            } else {
+                // Tight landscape phones/tablets: reduce scale if vertical space is insufficient
+                var availableL = (window.innerHeight || 0) - bannerH - 8;
+                if (rect.height > availableL) {
+                    var scaleL = Math.max(0.52, availableL / rect.height);
+                    container.style.transform = 'scale(' + scaleL + ')';
+                }
+            }
+        }
+
+        // Ready splash: show after tutorial; start game on click
+        (function(){
+            const readyOverlay = document.getElementById('ready-overlay');
+            const readyBtn = document.getElementById('ready-start-btn');
+            function startFromReady(){
+                if (readyOverlay) readyOverlay.style.display = 'none';
+                // Begin game and timer now
+                try { userInteractStart(); } catch(e) {}
+                // Ensure the banner remains but without install CTA during gameplay
+                try { const mobileBanner = document.getElementById('mobile-banner'); if (mobileBanner) mobileBanner.classList.remove('show-install'); } catch(e) {}
+            }
+            window.showReadySplash = function(){ if (readyOverlay) readyOverlay.style.display = 'flex'; };
+            if (readyOverlay) {
+                readyOverlay.addEventListener('click', (e)=>{
+                    // allow clicking anywhere; but ignore if click was inside button? not necessary
+                    startFromReady();
+                });
+            }
+            if (readyBtn) {
+                readyBtn.addEventListener('click', (e)=>{ e.stopPropagation(); startFromReady(); });
+            }
+        })();
+    </script>
+
+    <script>
+        // Live rewards updater: $ amount user will earn (same logic as game over)
+        function updateRewards(){
+            try {
+                var r = document.getElementById('rewards');
+                if (!r) return;
+                var amt = Math.floor((typeof score !== 'undefined' ? score : 0) / 10);
+                r.textContent = String(amt);
+            } catch(e) {}
+        }
         // Runtime adjustments for very short viewports (e.g., iPhone SE) to avoid cropping
         (function(){
             const shortCls = 'short-screen';
