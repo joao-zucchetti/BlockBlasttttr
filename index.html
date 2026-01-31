@@ -1260,6 +1260,29 @@
             }
         }
 
+        /* Desktop (wide) override: undo earlier 'squish' rules and present a spacious row layout */
+        @media (min-width: 1100px) {
+            #game-container {
+                display: flex;
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: center;
+                width: min(96%, 1200px);
+                max-width: 1400px;
+                padding: calc(1.6vh + var(--safe-top)) 28px;
+                gap: clamp(20px, 3.2vmin, 40px);
+                --grid-size: clamp(420px, 44vmin, 600px);
+                max-height: none;
+                overflow: visible;
+            }
+            .play-area { flex: 1 1 auto; max-width: calc(100% - 280px); padding: 0 36px; }
+            .logo { width: clamp(140px, 14vmin, 260px); margin-right: 28px; align-self: flex-start; }
+            .hud-row { width: auto; justify-content: flex-start; }
+            .dock { order: 3; }
+            /* hide mobile-style vertical banner on wide desktops */
+            .mobile-banner { display: none !important; }
+        }
+
         /* Stronger desktop dock rules to prevent vertical stacking */
         @media (min-width: 600px) {
             .dock {
@@ -1675,12 +1698,12 @@
         .headline .line2 { color: #00e676; font-weight: 900; font-size: clamp(22px, 6.2vmin, 28px); text-shadow: 0 3px 8px rgba(0,0,0,0.45); }
 
         /* Compact HUD (smaller, no icons) */
-        .hud-item.compact { flex: 0 0 auto; padding: 6px 10px; gap: 6px; min-width: clamp(130px, 24vmin, 190px); border-radius: 10px; min-height: 40px; }
+        .hud-item.compact { flex: 0 0 auto; padding: 6px 10px; gap: 6px; min-width: clamp(130px, 24vmin, 190px); border-radius: 10px; min-height: 60px; }
         .hud-item.compact .hud-label { font-size: 10px; margin-bottom: 0; opacity: 0.9; }
         .hud-item.compact .hud-value { font-size: clamp(18px, 3.2vmin, 24px); }
         /* Single HUD pill layout */
         .hud-item.single-pill { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-radius: 999px; width: var(--grid-size); max-width: 100%; box-sizing: border-box; box-shadow: 0 12px 34px rgba(0,0,0,0.45); }
-        .hud-item.single-pill .hud-pill-left, .hud-item.single-pill .hud-pill-right { display:flex; flex-direction:column; align-items:center; min-width: 64px; }
+        .hud-item.single-pill .hud-pill-left, .hud-item.single-pill .hud-pill-right { display:flex; flex-direction:column; align-items:center; min-width: 94px; }
         .hud-item.single-pill .hud-label { font-size: 10px; color: rgba(255,255,255,0.85); font-weight:800; }
         .hud-item.single-pill .hud-value { font-size: clamp(18px, 3.2vmin, 24px); color: #ffffff; font-weight:900; }
         .hud-pill-sep { opacity: 0.22; font-size: 18px; padding: 0 8px; }
